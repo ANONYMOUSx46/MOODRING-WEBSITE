@@ -1,0 +1,605 @@
+<html><head><base href="https://moodringwonders.com/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodSync - Interactive Mood Ring Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    
+    <style>
+      :root {
+        --primary-color: #1a1a2e;
+        --secondary-color: #16213e;
+        --accent-color: #3490de;
+        --text-color: #e6e6e6;
+        --gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        --card-gradient: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        --base-font-size: min(16px, 4vw);
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        scroll-behavior: smooth;
+      }
+      
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+        overflow-x: hidden;
+        font-size: var(--base-font-size);
+      }
+      
+      .glass-effect {
+        background: var(--card-gradient);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
+      }
+      
+      #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      
+      .content-wrapper {
+        position: relative;
+        z-index: 1;
+      }
+      
+      header {
+        background: var(--gradient);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      
+      .hero-content {
+        text-align: center;
+        padding: 2rem;
+        max-width: 800px;
+      }
+      
+      h1 {
+        font-size: 4.5rem;
+        font-weight: 700;
+        margin: 0;
+        background: linear-gradient(45deg, #3490de, #6e48aa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+      
+      .tagline {
+        font-size: 1.5rem;
+        margin: 1rem 0;
+        opacity: 0.9;
+      }
+      
+      nav {
+        background: rgba(26, 26, 46, 0.95);
+        padding: 1rem 0;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+      
+      nav.scrolled {
+        background: rgba(26, 26, 46, 0.98);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      }
+      
+      nav ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+      }
+      
+      nav a {
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      }
+      
+      nav a:hover {
+        background: var(--accent-color);
+        color: white;
+      }
+      
+      main {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+      }
+      
+      .mood-detector {
+        background: var(--card-gradient);
+        padding: 3rem;
+        border-radius: 30px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        margin: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      #finger-sensor {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        margin: 2rem auto;
+        background: var(--gradient);
+        cursor: pointer;
+        transition: all 0.4s ease;
+        box-shadow: 0 0 50px rgba(52, 144, 222, 0.3);
+        position: relative;
+      }
+      
+      #finger-sensor:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 70px rgba(52, 144, 222, 0.5);
+      }
+      
+      #finger-sensor::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.2); opacity: 0; }
+      }
+      
+      .mood-result {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        padding: 2rem;
+        border-radius: 20px;
+        display: none;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.5s ease;
+      }
+      
+      .mood-result.active {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 4rem 0;
+      }
+      
+      .color-card {
+        height: 300px;
+        perspective: 1000px;
+        cursor: pointer;
+      }
+      
+      .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+      }
+      
+      .color-card:hover .card-inner {
+        transform: rotateY(180deg);
+      }
+      
+      .card-front, .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--card-gradient);
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      
+      .card-back {
+        transform: rotateY(180deg);
+        background: var(--gradient);
+      }
+      
+      .color-sample {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin: 1rem auto;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+      }
+      
+      .science-section {
+        padding: 4rem 0;
+      }
+      
+      .science-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+      }
+      
+      .science-visualization {
+        position: relative;
+        height: 400px;
+        background: var(--card-gradient);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      
+      @media (max-width: 768px) {
+        nav {
+          padding: 0.5rem;
+        }
+        
+        nav ul {
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem 0;
+        }
+        
+        nav a {
+          display: block;
+          width: 100%;
+          text-align: center;
+          padding: 0.75rem;
+        }
+        
+        h1 {
+          font-size: 3rem;
+        }
+        
+        .tagline {
+          font-size: 1.2rem;
+          padding: 0 1rem;
+        }
+        
+        .mood-detector {
+          padding: 2rem 1rem;
+          margin: 2rem 0;
+        }
+        
+        #finger-sensor {
+          width: 200px;
+          height: 200px;
+          margin: 1.5rem auto;
+        }
+        
+        .mood-result {
+          font-size: 1.2rem;
+          padding: 1.5rem;
+        }
+        
+        .color-grid {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          margin: 2rem 0;
+        }
+        
+        .color-card {
+          height: 250px;
+        }
+        
+        .science-section {
+          padding: 2rem 1rem;
+        }
+        
+        .science-content {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        
+        .science-visualization {
+          height: 300px;
+        }
+      }
+    
+      @media (max-width: 968px) {
+        h1 { font-size: 3rem; }
+        .science-content { grid-template-columns: 1fr; }
+        nav ul { flex-direction: column; align-items: center; }
+      }
+    </style>
+    </head>
+    <body>
+      <div id="particles-js"></div>
+      
+      <div class="content-wrapper">
+        <nav>
+          <ul>
+            <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#mood-detector"><i class="fas fa-fingerprint"></i> Mood Detector</a></li>
+            <li><a href="#meanings"><i class="fas fa-palette"></i> Color Meanings</a></li>
+            <li><a href="#science"><i class="fas fa-microscope"></i> The Science</a></li>
+          </ul>
+        </nav>
+    
+        <header id="home">
+          <div class="hero-content">
+            <h1>MoodSync</h1>
+            <p class="tagline">Discover the colors of your emotions through cutting-edge mood detection technology</p>
+            <a href="#mood-detector" class="cta-button glass-effect">
+              <i class="fas fa-chevron-down"></i> Begin Your Journey
+            </a>
+          </div>
+        </header>
+    
+        <main>
+          <section id="mood-detector" class="mood-detector">
+            <h2><i class="fas fa-fingerprint"></i> Mood Detection Zone</h2>
+            <p>Place your finger on the sensor below and let the magic happen!</p>
+            <div id="finger-sensor"></div>
+            <div class="mood-result glass-effect"></div>
+          </section>
+    
+          <section id="meanings">
+            <h2><i class="fas fa-palette"></i> Understanding Mood Colors</h2>
+            <div class="color-grid">
+              <!-- Color cards will be dynamically generated -->
+            </div>
+          </section>
+    
+          <section id="science" class="science-section glass-effect">
+            <h2><i class="fas fa-microscope"></i> The Science Behind Mood Rings</h2>
+            <div class="science-content">
+              <div class="science-text">
+                <p>Mood rings utilize advanced thermochromic liquid crystals that respond to subtle changes in your body temperature. These microscopic crystals twist and turn based on temperature variations, affecting how they reflect light and creating the beautiful color changes you observe.</p>
+              </div>
+              <div class="science-visualization" id="crystal-animation">
+                <!-- WebGL visualization will be added here -->
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    
+      <script>
+        // Initialize particles.js
+        particlesJS('particles-js',
+          {
+            "particles": {
+              "number": {
+                "value": 80,
+                "density": {
+                  "enable": true,
+                  "value_area": 800
+                }
+              },
+              "color": {
+                "value": "#3490de"
+              },
+              "shape": {
+                "type": "circle"
+              },
+              "opacity": {
+                "value": 0.5,
+                "random": false
+              },
+              "size": {
+                "value": 3,
+                "random": true
+              },
+              "line_linked": {
+                "enable": true,
+                "distance": 150,
+                "color": "#3490de",
+                "opacity": 0.4,
+                "width": 1
+              },
+              "move": {
+                "enable": true,
+                "speed": 2,
+                "direction": "none",
+                "random": false,
+                "straight": false,
+                "out_mode": "out",
+                "bounce": false
+              }
+            },
+            "interactivity": {
+              "detect_on": "canvas",
+              "events": {
+                "onhover": {
+                  "enable": true,
+                  "mode": "repulse"
+                },
+                "onclick": {
+                  "enable": true,
+                  "mode": "push"
+                },
+                "resize": true
+              }
+            },
+            "retina_detect": true
+          }
+        );
+    
+        // Enhanced mood ring color data
+        const moodColors = [
+          { 
+            color: '#000000', 
+            mood: 'Stressed or Anxious', 
+            description: 'Your body is signaling heightened stress levels. Try some deep breathing exercises.',
+            icon: 'fas fa-wind'
+          },
+          { 
+            color: '#4B0082', 
+            mood: 'Deep Relaxation', 
+            description: 'You\'ve achieved a wonderful state of peace and tranquility.',
+            icon: 'fas fa-moon'
+          },
+          { 
+            color: '#0000FF', 
+            mood: 'Calm and Happy', 
+            description: 'Your emotional state is balanced and positive.',
+            icon: 'fas fa-smile'
+          },
+          { 
+            color: '#00FF00', 
+            mood: 'Normal and Active', 
+            description: 'You\'re in an optimal state of mind and body harmony.',
+            icon: 'fas fa-check-circle'
+          },
+          { 
+            color: '#FFFF00', 
+            mood: 'Excited', 
+            description: 'Your energy levels are peaking with positive anticipation.',
+            icon: 'fas fa-bolt'
+          },
+          { 
+            color: '#FFA500', 
+            mood: 'Nervous or Unsettled', 
+            description: 'You might be experiencing some uncertainty or anticipation.',
+            icon: 'fas fa-question-circle'
+          },
+          { 
+            color: '#FF0000', 
+            mood: 'Passionate or Energetic', 
+            description: 'You\'re experiencing intense emotions and high energy.',
+            icon: 'fas fa-fire'
+          }
+        ];
+    
+        // Generate enhanced color cards
+        const colorGrid = document.querySelector('.color-grid');
+        moodColors.forEach(moodData => {
+          const card = document.createElement('div');
+          card.classList.add('color-card');
+          card.innerHTML = `
+            <div class="card-inner">
+              <div class="card-front glass-effect">
+                <i class="${moodData.icon} fa-3x"></i>
+                <div class="color-sample" style="background-color: ${moodData.color}"></div>
+                <h3>${moodData.mood}</h3>
+              </div>
+              <div class="card-back">
+                <i class="${moodData.icon} fa-2x"></i>
+                <p>${moodData.description}</p>
+              </div>
+            </div>
+          `;
+          colorGrid.appendChild(card);
+        });
+    
+        // Enhanced finger sensor interaction
+        const fingerSensor = document.getElementById('finger-sensor');
+        const moodResult = document.querySelector('.mood-result');
+        let touchTimer;
+        let currentTemp = 0;
+    
+        fingerSensor.addEventListener('touchstart', handleTouchStart);
+        fingerSensor.addEventListener('touchend', handleTouchEnd);
+        fingerSensor.addEventListener('mousedown', handleTouchStart);
+        fingerSensor.addEventListener('mouseup', handleTouchEnd);
+        fingerSensor.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+        });
+    
+        function handleTouchStart(e) {
+          e.preventDefault();
+          document.body.style.overflow = 'hidden';
+          currentTemp = 0;
+          gsap.to(fingerSensor, {
+            scale: 0.95,
+            duration: 0.2
+          });
+          touchTimer = setInterval(() => {
+            currentTemp += 1;
+            updateMoodRing();
+          }, 100);
+        }
+    
+        function handleTouchEnd() {
+          clearInterval(touchTimer);
+          document.body.style.overflow = 'auto';
+          gsap.to(fingerSensor, {
+            scale: 1,
+            duration: 0.2
+          });
+          displayMoodResult();
+        }
+    
+        function updateMoodRing() {
+          const hue = (currentTemp * 5) % 360;
+          fingerSensor.style.background = `linear-gradient(145deg, hsl(${hue}, 70%, 50%), hsl(${hue + 40}, 70%, 40%))`;
+        }
+    
+        function displayMoodResult() {
+          const randomMood = moodColors[Math.floor(Math.random() * moodColors.length)];
+          moodResult.style.display = 'block';
+          moodResult.style.backgroundColor = randomMood.color;
+          moodResult.style.color = isColorLight(randomMood.color) ? '#000' : '#fff';
+          moodResult.innerHTML = `
+            <i class="${randomMood.icon} fa-2x"></i>
+            <h3>${randomMood.mood}</h3>
+            <p>${randomMood.description}</p>
+          `;
+          moodResult.classList.add('active');
+        }
+    
+        function isColorLight(color) {
+          const hex = color.replace('#', '');
+          const r = parseInt(hex.substr(0, 2), 16);
+          const g = parseInt(hex.substr(2, 2), 16);
+          const b = parseInt(hex.substr(4, 2), 16);
+          const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+          return brightness > 128;
+        }
+    
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+          const nav = document.querySelector('nav');
+          if (window.scrollY > 100) {
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
+        });
+    
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+              behavior: 'smooth'
+            });
+          });
+        });
+      </script>
+    </body>
+    </html>
