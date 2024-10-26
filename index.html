@@ -86,43 +86,41 @@
         opacity: 0.9;
       }
       
-      .hamburger {
-  display: none;
-  cursor: pointer;
-  font-size: 2rem;
-  color: var(--text-color);
-}
-
-#nav-links {
-  display: flex;
-}
-
-@media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-
-  #nav-links {
-    display: none; /* Hide links by default */
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 1rem 0;
-  }
-
-  #nav-links.show {
-    display: flex; /* Show links when toggled */
-  }
-
-  nav ul {
-    gap: 1rem;
-  }
-
-  nav a {
-    padding: 0.5rem 1rem;
-    font-size: 1rem; /* Smaller font size */
-  }
-}
+      nav {
+        background: rgba(26, 26, 46, 0.95);
+        padding: 1rem 0;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+      
+      nav.scrolled {
+        background: rgba(26, 26, 46, 0.98);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      }
+      
+      nav ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+      }
+      
+      nav a {
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      }
+      
+      nav a:hover {
+        background: var(--accent-color);
+        color: white;
+      }
       
       main {
         max-width: 1400px;
@@ -343,10 +341,7 @@
       
       <div class="content-wrapper">
         <nav>
-	   <div class="hamburger" onclick="toggleMenu()">
-   	     <i class="fas fa-bars"></i>
-  	   </div>
-          <ul id="nav-links">
+          <ul>
             <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="#mood-detector"><i class="fas fa-fingerprint"></i> Mood Detector</a></li>
             <li><a href="#meanings"><i class="fas fa-palette"></i> Color Meanings</a></li>
@@ -587,10 +582,13 @@
         }
     
         // Navbar scroll effect
-        function toggleMenu() {
-  const navLinks = document.getElementById('nav-links');
-  navLinks.classList.toggle('show');
-}
+        window.addEventListener('scroll', () => {
+          const nav = document.querySelector('nav');
+          if (window.scrollY > 100) {
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
         });
     
         // Smooth scroll for navigation
